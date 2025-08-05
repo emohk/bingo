@@ -1,0 +1,9 @@
+{% if game.is_private %}
+<p class="text-gray-500 text-sm">Game Code: {{ game.game_code }}</p>
+{% endif %}
+<p class="text-gray-700 text-lg font-semibold">Players Joined: {{ player_count }}/2</p>
+<div class="flex justify-center gap-3 mt-2">
+    {% for player in players %}
+        <p class="px-3 py-1 bg-gray-100 rounded-full text-gray-600">{{ player.name }}</p>
+    {% endfor %}
+</div>

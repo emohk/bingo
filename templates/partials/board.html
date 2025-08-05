@@ -1,0 +1,33 @@
+<div class="inline-flex flex-col overflow-hidden rounded border border-gray-300 bg-white shadow-sm">
+    {% for row in board %}
+        <div class="flex divide-x divide-gray-300 {% if not forloop.first %}border-t border-gray-300{% endif %}">
+            {% for cell in row %}
+                <button
+                    type="button"
+                    id="cell-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}"
+                    class="w-16 aspect-square flex items-center justify-center text-sm font-medium transition-colors
+                    {% if cell in game.called_numbers %}
+                        {% if cell in line_numbers %}
+                            bg-yellow-300 text-gray-900
+                        {% else %}
+                            bg-gray-300 text-gray-600
+                        {% endif %}
+                    {% else %}
+                        bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900
+                    {% endif %}"
+                    
+                    {% if cell in game.called_numbers or not player.turn %}
+                        disabled
+                    {% else %}
+                        hx-post="{% url 'make_move' game.game_code %}"
+                        hx-vals='{"row": "{{ forloop.parentloop.counter0 }}", "col": "{{ forloop.counter0 }}"}'
+                        hx-swap="none"
+                        hx-trigger="click"
+                    {% endif %}
+                >
+                    {{ cell }}
+                </button>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

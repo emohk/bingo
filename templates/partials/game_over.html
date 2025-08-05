@@ -1,0 +1,11 @@
+<div id="board" hx-swap-oob="true" class="flex flex-col items-center justify-center text-center bg-white rounded-lg shadow-md p-8">
+    <p class="text-2xl font-bold text-red-600 mb-4">Game Over</p>
+    <p class="text-lg text-gray-700 mb-6">Your opponent has disconnected.</p>
+    <a href="{% url 'join' %}"
+       class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors duration-200">
+        Start New Game
+    </a>
+</div>
+
+<div id="game-info" class="game-info text-center mb-6" hx-swap-oob="true">
+</div>

@@ -1,0 +1,9 @@
+<div id="board" class="flex justify-center" hx-swap-oob="true">
+    <div class="loader text-center py-10">
+        Waiting for player...
+    </div>
+</div>
+
+<div id="game-info" class="game-info text-center mb-6" hx-swap-oob="true">
+    {% include "partials/game_info.html" with game=game %}
+</div>
