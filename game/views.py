@@ -12,38 +12,6 @@ from . import util
 import uuid
 
 
-def create_player(game, player_id, player_name, is_first_player=False):
-    """Create or update a player in the game."""
-    if Player.objects.filter(player_id=player_id).exists():
-        player = Player.objects.get(player_id=player_id)
-        player.name = player_name
-        player.game = game
-        player.board = util.generate_board(numbers=game.numbers)
-        player.turn = is_first_player
-        player.save()
-    else:
-        Player.objects.create(
-            game=game,
-            player_id=player_id,
-            board=util.generate_board(numbers=game.numbers),
-            turn=is_first_player,
-            name=player_name,
-        )
-
-
-def announce_winner(channel_layer, group_code, player):
-    """Announce the winner of the game."""
-    player.game.is_active = False
-    player.game.save()
-    async_to_sync(channel_layer.group_send)(
-        group_code,
-        {
-            "type": "game_result",
-            "winner_id": str(player.player_id),
-        },
-    )
-
-
 def join_game(request):
     """Join or create a game, handling session and player creation."""
 
@@ -69,7 +37,7 @@ def join_game(request):
                 numbers=util.generate_numbers(),
                 is_private=True,
             )
-            create_player(game, player_id, player_name, True)
+            util.create_player(game, player_id, player_name, True)
             return redirect("game", game_code=game.game_code)
 
         # Join Game by code
@@ -81,7 +49,7 @@ def join_game(request):
                     is_private=True,
                 )
                 is_first_player = not game.players.exists()
-                create_player(game, player_id, player_name, is_first_player)
+                util.create_player(game, player_id, player_name, is_first_player)
                 return redirect("game", game_code=game_code)
             except Game.DoesNotExist:
                 return HttpResponse("Invalid game code", status=400)
@@ -99,7 +67,7 @@ def join_game(request):
                 numbers=util.generate_numbers(),
             )
             is_first_player = True
-        create_player(game, player_id, player_name, is_first_player)
+        util.create_player(game, player_id, player_name, is_first_player)
         return redirect("game", game.game_code)
     return render(
         request,
@@ -183,11 +151,11 @@ def make_move(request, game_code):
             )
 
             if player.check_winner():
-                announce_winner(channel_layer, group_code, player)
+                util.announce_winner(channel_layer, group_code, player)
                 return HttpResponse(status=204)
             opponent = game.players.exclude(player_id=player_id).first()
             if opponent.check_winner():
-                announce_winner(channel_layer, group_code, opponent)
+                util.announce_winner(channel_layer, group_code, opponent)
                 return HttpResponse(status=204)
 
             player.turn = not player.turn
