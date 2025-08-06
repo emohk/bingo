@@ -70,7 +70,6 @@ def join_game(request):
                 is_private=True,
             )
             create_player(game, player_id, player_name, True)
-            print(f"Created new game with code: {game.game_code}")
             return redirect("game", game_code=game.game_code)
 
         # Join Game by code
@@ -95,7 +94,6 @@ def join_game(request):
         )
         is_first_player = False
         if not game:
-            print("No active game found, creating a new one.")
             game = Game.objects.create(
                 game_code=util.generate_unique_game_code(),
                 numbers=util.generate_numbers(),
@@ -145,7 +143,6 @@ def make_move(request, game_code):
     """Handle a player's move in the game."""
     player_id = request.session.get("player_id")
     if not player_id:
-        print("No player id found in session")
         return HttpResponse("Player not found", status=400)
 
     if request.method == "POST":
@@ -154,20 +151,17 @@ def make_move(request, game_code):
             player = get_object_or_404(Player, game=game, player_id=player_id)
 
             if not player.turn:
-                print("Not your turn")
                 return JsonResponse({"error": "Not your turn"}, status=400)
 
             row = request.POST.get("row")
             col = request.POST.get("col")
 
             if row is None or col is None:
-                print("Row and col are required")
                 return JsonResponse({"error": "Row and col required"}, status=400)
 
             row, col = int(row), int(col)
 
             if not (0 <= row < 5 and 0 <= col < 5):
-                print("Invalid move: row or col out of bounds")
                 return JsonResponse({"error": "Invalid move"}, status=400)
 
             # Get the called number
@@ -175,7 +169,6 @@ def make_move(request, game_code):
 
             # If already called, reject
             if called_number in game.called_numbers:
-                print(f"Number {called_number} already called")
                 return JsonResponse({"error": "Number already called"}, status=400)
 
             # Mark the number as called globally

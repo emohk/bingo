@@ -36,7 +36,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 player_count = len(players_qs)
 
                 if player_count == 1:
-                    print("Waiting for another player to join...")
                     waiting_html = render_to_string(
                         "partials/waiting.html",
                         {
