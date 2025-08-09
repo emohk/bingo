@@ -6,12 +6,9 @@ import uuid
 
 class Game(models.Model):
     game_code = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_private = models.BooleanField(default=False)
-    numbers = ArrayField(
-        models.IntegerField(), default=list
-    )  # List of numbers called in the game
+    numbers = ArrayField(models.IntegerField(), default=list)
     called_numbers = ArrayField(models.IntegerField(), default=list)
 
     def __str__(self):
@@ -26,8 +23,6 @@ class Player(models.Model):
         ArrayField(models.IntegerField(), size=5), size=5
     )  # 5x5 bingo board
     turn = models.BooleanField(default=False)
-    joined_at = models.DateTimeField(auto_now_add=True)
-    is_connected = models.BooleanField(default=True)
 
     def completed_lines(self):
         """Returns no. of completed lines and numbers in those lines in the player's board."""
