@@ -124,16 +124,15 @@ def make_move(request, game_code):
             row = request.POST.get("row")
             col = request.POST.get("col")
 
-            if row is None or col is None:
-                return JsonResponse({"error": "Row and col required"}, status=400)
+            if row is None and col is None:
+                called_number = util.get_random_number(game)
+            else:
+                row, col = int(row), int(col)
 
-            row, col = int(row), int(col)
+                if not (0 <= row < 5 and 0 <= col < 5):
+                    return JsonResponse({"error": "Invalid move"}, status=400)
 
-            if not (0 <= row < 5 and 0 <= col < 5):
-                return JsonResponse({"error": "Invalid move"}, status=400)
-
-            # Get the called number
-            called_number = player.board[row][col]
+                called_number = player.board[row][col]
 
             # If already called, reject
             if called_number in game.called_numbers:
