@@ -23,12 +23,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Mark player as connected
         if self.player_id:
             try:
-                player = await database_sync_to_async(Player.objects.get)(
-                    game__game_code=self.game_code, player_id=self.player_id
-                )
-                player.is_connected = True
-                await database_sync_to_async(player.save)()
-
                 game = await database_sync_to_async(Game.objects.get)(
                     game_code=self.game_code
                 )

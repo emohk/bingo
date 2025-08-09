@@ -15,8 +15,6 @@ class PlayerAdmin(admin.ModelAdmin):
         "game",
         "display_board",
         "turn",
-        "is_connected",
-        "joined_at",
     )
     readonly_fields = ("display_board", "board")
 
