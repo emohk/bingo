@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.db.models import Count
+from django.utils import timezone
 
 from django.template.loader import render_to_string
 from channels.layers import get_channel_layer
@@ -10,6 +11,7 @@ from asgiref.sync import async_to_sync
 from .models import Game, Player
 from . import util
 import uuid
+from datetime import timedelta
 
 
 def join_game(request):
@@ -118,22 +120,27 @@ def make_move(request, game_code):
             game = get_object_or_404(Game, game_code=game_code, is_active=True)
             player = get_object_or_404(Player, game=game, player_id=player_id)
 
+            if (
+                game.last_move_made_at
+                and timezone.now() - game.last_move_made_at > timedelta(seconds=45)
+            ):
+                return redirect("join")
+
             if not player.turn:
                 return JsonResponse({"error": "Not your turn"}, status=400)
 
             row = request.POST.get("row")
             col = request.POST.get("col")
 
-            if row is None or col is None:
-                return JsonResponse({"error": "Row and col required"}, status=400)
+            if row is None and col is None:
+                called_number = util.get_random_number(game)
+            else:
+                row, col = int(row), int(col)
 
-            row, col = int(row), int(col)
+                if not (0 <= row < 5 and 0 <= col < 5):
+                    return JsonResponse({"error": "Invalid move"}, status=400)
 
-            if not (0 <= row < 5 and 0 <= col < 5):
-                return JsonResponse({"error": "Invalid move"}, status=400)
-
-            # Get the called number
-            called_number = player.board[row][col]
+                called_number = player.board[row][col]
 
             # If already called, reject
             if called_number in game.called_numbers:
@@ -141,6 +148,7 @@ def make_move(request, game_code):
 
             # Mark the number as called globally
             game.called_numbers.append(called_number)
+            game.last_move_made_at = timezone.now()
             game.save()
 
             channel_layer = get_channel_layer()

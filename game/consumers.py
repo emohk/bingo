@@ -4,6 +4,7 @@ from django.urls import reverse
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.template.loader import render_to_string
+from django.utils import timezone
 from .models import Player, Game
 
 
@@ -26,8 +27,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 game = await database_sync_to_async(Game.objects.get)(
                     game_code=self.game_code
                 )
-                players_qs = await database_sync_to_async(list)(game.players.all())
-                player_count = len(players_qs)
+                player_count = await database_sync_to_async(game.players.count)()
 
                 if player_count == 1:
                     waiting_html = render_to_string(
@@ -35,11 +35,11 @@ class GameConsumer(AsyncWebsocketConsumer):
                         {
                             "game": game,
                             "player_count": player_count,
-                            "players": players_qs,
                         },
                     )
                     await self.send(text_data=waiting_html)
                 elif player_count == 2:
+                    game.last_move_made_at = timezone.now()
                     await self.channel_layer.group_send(
                         self.group_name,
                         {
@@ -107,7 +107,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         completed_lines = await database_sync_to_async(player.completed_lines)()
 
-        players = await database_sync_to_async(list)(game.players.all())
+        players = await database_sync_to_async(list)(
+            game.players.all().order_by("player_id")
+        )
         player_count = len(players)
 
         context = {

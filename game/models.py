@@ -10,6 +10,7 @@ class Game(models.Model):
     is_private = models.BooleanField(default=False)
     numbers = ArrayField(models.IntegerField(), default=list)
     called_numbers = ArrayField(models.IntegerField(), default=list)
+    last_move_made_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Game {self.game_code} ({'Active' if self.is_active else 'Ended'})"

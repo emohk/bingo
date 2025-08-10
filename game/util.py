@@ -56,3 +56,9 @@ def announce_winner(channel_layer, group_code, player):
             "winner_id": str(player.player_id),
         },
     )
+
+
+def get_random_number(game):
+    for num in game.numbers:
+        if num not in game.called_numbers:
+            return num
