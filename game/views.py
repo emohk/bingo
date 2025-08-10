@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.db.models import Count
+from django.utils import timezone
 
 from django.template.loader import render_to_string
 from channels.layers import get_channel_layer
@@ -10,6 +11,7 @@ from asgiref.sync import async_to_sync
 from .models import Game, Player
 from . import util
 import uuid
+from datetime import timedelta
 
 
 def join_game(request):
@@ -118,6 +120,12 @@ def make_move(request, game_code):
             game = get_object_or_404(Game, game_code=game_code, is_active=True)
             player = get_object_or_404(Player, game=game, player_id=player_id)
 
+            if (
+                game.last_move_made_at
+                and timezone.now() - game.last_move_made_at > timedelta(seconds=45)
+            ):
+                return redirect("join")
+
             if not player.turn:
                 return JsonResponse({"error": "Not your turn"}, status=400)
 
@@ -140,6 +148,7 @@ def make_move(request, game_code):
 
             # Mark the number as called globally
             game.called_numbers.append(called_number)
+            game.last_move_made_at = timezone.now()
             game.save()
 
             channel_layer = get_channel_layer()

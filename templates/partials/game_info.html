@@ -3,7 +3,43 @@
 {% endif %}
 <p class="text-gray-700 text-lg font-semibold">Players Joined: {{ player_count }}/2</p>
 <div class="flex justify-center gap-3 mt-2">
-    {% for player in players %}
-        <p class="px-3 py-1 bg-gray-100 rounded-full text-gray-600">{{ player.name }}</p>
-    {% endfor %}
+    <div class="flex flex-col items-center">
+        <p
+            class="px-3 py-1 {% if players.0.turn %} bg-green-200 {% else %} bg-gray-100 {% endif %} rounded-full text-gray-600">
+            {{ players.0.name }}
+        </p>
+    </div>
+    
+    <div x-data="{
+        timeLeft: 15,
+        start() {
+            let timer = setInterval(() => {
+                this.timeLeft--;
+                if (this.timeLeft <= 0) {
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
+    }"
+    x-init="start()"
+    :class="{'animate-pulse text-red-600': timeLeft <= 5}"
+class="font-bold text-lg">
+        {% if player.turn %}
+        <form
+            hx-post="{% url 'make_move' game.game_code %}"
+            hx-trigger="load delay:15s"
+            hidden
+        ></form>
+        {% endif %}
+        <div class="flex flex-col items-center">
+            <div x-text="timeLeft"></div>
+            <span class="font-light text-xs text-gray-500">seconds left</span>
+        </div>
+    </div>
+    <div class="flex flex-col items-center">
+    <p
+        class="px-3 py-1 {% if players.1.turn %} bg-green-200 {% else %} bg-gray-100 {% endif %} rounded-full text-gray-600">
+        {{ players.1.name }}
+    </p>
+    </div>
 </div>
