@@ -1,10 +1,18 @@
+{% load static %}
+
 <div id="board" hx-swap-oob="true" class="flex flex-col items-center justify-center text-center bg-white rounded-lg shadow-md p-8">
     {% if is_winner %}
         <p class="text-3xl font-extrabold text-green-600 mb-4">🎉 You Win!</p>
         <p class="text-lg text-gray-700 mb-6">Congratulations on your victory!</p>
+        <audio autoplay>
+            <source src="{% static 'audio/win.mp3' %}">
+        </audio>
     {% else %}
         <p class="text-3xl font-extrabold text-red-600 mb-4">😢 You Lost</p>
         <p class="text-lg text-gray-700 mb-6">Better luck next time!</p>
+        <audio autoplay>
+            <source src="{% static 'audio/lose.mp3' %}">
+        </audio>
     {% endif %}
     <a href="{% url 'join' %}"
        class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-colors duration-200">
