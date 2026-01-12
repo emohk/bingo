@@ -37,7 +37,7 @@ _Gameplay in progress showing marked numbers and current game state_
 ### Game Result
 
 ![Game Result](screenshots/result.png)
-_The final results screen showing the winner and game statistics_
+_The final results screen showing the winner._
 
 ## Prerequisites
 
