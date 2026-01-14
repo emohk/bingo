@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-v0x@9pbk&&nr*d9jn^e#t*m#u0_+s!nhmnubj!r!^j9(eoxdzj"
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
 
 # Application definition
@@ -82,11 +83,11 @@ ASGI_APPLICATION = "bingo.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "bingoprojectdb",
-        "USER": "bingoprojectadmin",
-        "PASSWORD": "testpass123",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": config("DB_NAME", default="bingoprojectdb"),
+        "USER": config("DB_USER", default="bingoprojectadmin"),
+        "PASSWORD": config("DB_PASSWORD", default="testpass123"),
+        "HOST": config("DB_HOST", default="localhost"),
+        "PORT": config("DB_PORT", default="5432"),
     }
 }
 
@@ -94,7 +95,12 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [
+                (
+                    config("REDIS_HOST", default="127.0.0.1"),
+                    config("REDIS_PORT", default=6379, cast=int),
+                )
+            ],
         },
     },
 }

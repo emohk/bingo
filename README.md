@@ -48,6 +48,36 @@ Before running this application, make sure you have the following installed:
 - Redis
 - Node.js (for asset compilation, if needed)
 
+## Environment Variables
+
+This application uses environment variables for configuration. Copy the `.env.example` file to `.env` and update the values:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your actual configuration values:
+
+```env
+# Django settings
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Database settings
+DB_NAME=bingoprojectdb
+DB_USER=bingoprojectadmin
+DB_PASSWORD=your-db-password-here
+DB_HOST=localhost
+DB_PORT=5432
+
+# Redis settings
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+```
+
+For production, set `DEBUG=False` and update `ALLOWED_HOSTS` with your domain names.
+
 ## Installation
 
 1. **Clone the repository:**
@@ -72,9 +102,9 @@ Before running this application, make sure you have the following installed:
 
 4. **Set up PostgreSQL database:**
 
-   - Create a database named `bingoprojectdb`
-   - Create a user `bingoprojectadmin` with password `testpass123`
-   - Or update the database settings in `bingo/settings.py`
+   - Create a database with the name specified in `DB_NAME` (default: `bingoprojectdb`)
+   - Create a user with the credentials specified in `DB_USER` and `DB_PASSWORD`
+   - Or update the database settings in the `.env` file
 
 5. **Start Redis server:**
 
@@ -101,12 +131,12 @@ The application will be available at `http://127.0.0.1:8000`
 
 To allow other devices on your local network to access the application:
 
-1. **Update ALLOWED_HOSTS in settings:**
+1. **Update ALLOWED_HOSTS in .env file:**
 
-   Edit `bingo/settings.py` and change:
+   Add your local IP or use `*` for development:
 
-   ```python
-   ALLOWED_HOSTS = ['*']
+   ```env
+   ALLOWED_HOSTS=localhost,127.0.0.1,192.168.1.100
    ```
 
 2. **Run the server on all interfaces:**
