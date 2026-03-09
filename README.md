@@ -1,195 +1,181 @@
 # Bingo Game
 
-A real-time 2-player online bingo game built with Django, HTMX, and Alpine.js.
+A real-time 2-player online bingo game built with Django, Django Channels, HTMX, and Alpine.js.
 
 ## Features
 
-- **Real-time Gameplay**: Live game updates using WebSockets via Django Channels
-- **Game Rooms**: Join games using unique game codes
-- **Private Games**: Create private games for exclusive play
-- **Interactive UI**: Dynamic frontend with HTMX and Alpine.js
-- **5x5 Bingo Boards**: Traditional bingo gameplay with row, column, and diagonal wins
-- **Turn-based Play**: Alternating turns between players
-- **Session Management**: Persistent player sessions across games
+- Real-time gameplay using WebSockets via Django Channels
+- Game rooms with shareable game codes
+- Private games for invite-only play
+- Turn-based 5x5 bingo board mechanics
+- Live game state updates without page refresh
 
 ## Screenshots
 
 ### Join Game Page
 
 ![Join Game Page](screenshots/join_page.png)
-_The initial page where players enter their name and join or create a game_
+_The initial page where players enter their name and join or create a game._
 
 ### Waiting Room
 
 ![Waiting Room](screenshots/waiting_room.png)
-_The waiting area where players wait for the game to start_
+_The waiting area where players wait for the game to start._
 
 ### Game Started
 
 ![Game Started](screenshots/game_started.png)
-_The bingo board view when the game begins_
+_The bingo board view when the game begins._
 
 ### Mid Game
 
 ![Mid Game](screenshots/mid_game.png)
-_Gameplay in progress showing marked numbers and current game state_
+_Gameplay in progress showing marked numbers and current game state._
 
 ### Game Result
 
 ![Game Result](screenshots/result.png)
 _The final results screen showing the winner._
 
-## Prerequisites
+## Quick Start (Docker Compose)
 
-Before running this application, make sure you have the following installed:
+### Prerequisites
 
-- Python 3.8+
-- PostgreSQL
-- Redis
-- Node.js (for asset compilation, if needed)
+- Docker
+- Docker Compose (v2)
 
-## Environment Variables
+### 1. Configure Environment
 
-This application uses environment variables for configuration. Copy the `.env.example` file to `.env` and update the values:
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env` with your actual configuration values:
+Then update at least these values in `.env`:
 
-```env
-# Django settings
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+- `SECRET_KEY`
+- `DEBUG`
+- `ALLOWED_HOSTS`
+- `DB_PASSWORD`
 
-# Database settings
-DB_NAME=bingoprojectdb
-DB_USER=bingoprojectadmin
-DB_PASSWORD=your-db-password-here
-DB_HOST=localhost
-DB_PORT=5432
+Note: `docker-compose.yml` sets `DB_HOST=db` and `REDIS_HOST=redis` for container networking automatically.
 
-# Redis settings
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-```
-
-For production, set `DEBUG=False` and update `ALLOWED_HOSTS` with your domain names.
-
-## Installation
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone <repository-url>
-   cd bingo
-   ```
-
-2. **Create a virtual environment:**
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Python dependencies:**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up PostgreSQL database:**
-
-   - Create a database with the name specified in `DB_NAME` (default: `bingoprojectdb`)
-   - Create a user with the credentials specified in `DB_USER` and `DB_PASSWORD`
-   - Or update the database settings in the `.env` file
-
-5. **Start Redis server:**
-
-   ```bash
-   redis-server
-   ```
-
-6. **Run database migrations:**
-   ```bash
-   python manage.py migrate
-   ```
-
-## Running the Application
-
-**Start the development server:**
+### 2. Build and Start
 
 ```bash
+docker compose up --build
+```
+
+The web app will be available at:
+
+- `http://127.0.0.1:8000`
+
+On startup, the web container automatically runs migrations and then starts Daphne.
+
+### 3. Stop the Stack
+
+```bash
+docker compose down
+```
+
+To remove database volume data as well:
+
+```bash
+docker compose down -v
+```
+
+## Useful Docker Commands
+
+Run tests:
+
+```bash
+docker compose exec web python manage.py test
+```
+
+Create a superuser:
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+Create new migrations:
+
+```bash
+docker compose exec web python manage.py makemigrations
+```
+
+Apply migrations manually:
+
+```bash
+docker compose exec web python manage.py migrate
+```
+
+Follow web logs:
+
+```bash
+docker compose logs -f web
+```
+
+## Services and Ports
+
+- `web`: Django + Daphne app on `8000`
+- `db`: PostgreSQL on `5432`
+- `redis`: Redis on `6379`
+
+## Environment Variables
+
+The app reads these variables (see `.env.example`):
+
+- `SECRET_KEY`
+- `DEBUG`
+- `ALLOWED_HOSTS`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+- `REDIS_HOST`
+- `REDIS_PORT`
+
+## Local Development (Without Docker)
+
+### Prerequisites
+
+- Python 3.12+
+- PostgreSQL
+- Redis
+
+### Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Start PostgreSQL and Redis, then run:
+
+```bash
+python manage.py migrate
 python manage.py runserver
 ```
 
-The application will be available at `http://127.0.0.1:8000`
-
-### Running on Local Network
-
-To allow other devices on your local network to access the application:
-
-1. **Update ALLOWED_HOSTS in .env file:**
-
-   Add your local IP or use `*` for development:
-
-   ```env
-   ALLOWED_HOSTS=localhost,127.0.0.1,192.168.1.100
-   ```
-
-2. **Run the server on all interfaces:**
-
-   ```bash
-   python manage.py runserver 0.0.0.0:8000
-   ```
-
-3. **Find your local IP address:**
-
-   ```bash
-   ipconfig getifaddr en0  # macOS
-   # or
-   hostname -I  # Linux
-   ```
-
-4. **Access from other devices:**
-
-   Other devices on the same network can now access the application using your computer's IP address:
-   `http://YOUR_LOCAL_IP:8000`
-
-   _Note: Make sure your firewall allows connections on port 8000_
-
-## Usage
-
-1. **Join a Game:**
-
-   - Visit the homepage
-   - Enter a game code to join an existing game
-   - Or create a new private game
-
-2. **Gameplay:**
-
-   - Players take turns calling numbers
-   - Mark numbers on your bingo board as they're called
-   - Get 5 in a row (horizontal, vertical, or diagonal) to win!
-
-3. **Real-time Updates:**
-   - Game state updates automatically for all players
-   - No need to refresh the page
-
 ## Project Structure
 
-```
+```text
 bingo/
 ├── bingo/                 # Django project settings
 ├── game/                  # Main game application
-│   ├── models.py         # Game and Player models
-│   ├── views.py          # HTTP request handlers
-│   ├── consumers.py      # WebSocket consumers
-│   ├── templates/        # HTML templates
-│   └── static/           # CSS, JS, audio files
-├── static/               # Static assets
-├── templates/            # Base templates
-└── manage.py            # Django management script
+│   ├── models.py          # Game and Player models
+│   ├── views.py           # HTTP request handlers
+│   ├── consumers.py       # WebSocket consumers
+│   └── tests/             # App tests
+├── templates/             # HTML templates
+├── static/                # Static assets
+├── Dockerfile
+├── docker-compose.yml
+├── entrypoint.sh
+└── manage.py
 ```
